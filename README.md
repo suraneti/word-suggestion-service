@@ -9,3 +9,12 @@ git clone git@bitbucket.org:innocnx/word_suggestion.git
 cd word_suggestion
 go run main.go
 ```
+
+## Endpoints
+
+### Resource components
+Resource components list 
+
+| method    | resource                      | request body (json only)              | description                 |
+|:----------|:------------------------------|:--------------------------------------|:----------------------------|
+|`POST`     | `/suggestion`                 | {"word": "Some word"}                 | Return suggestion word      |
