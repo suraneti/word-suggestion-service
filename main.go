@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	"word_suggestion_service/logging"
-	"word_suggestion_service/suggestion"
+	"word_suggestion/logging"
+	"word_suggestion/suggestion"
 
 	"github.com/gorilla/mux"
 )
