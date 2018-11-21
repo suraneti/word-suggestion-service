@@ -10,6 +10,13 @@ cd word_suggestion
 go run main.go
 ```
 
+## Build for Linux
+
+### Git bash
+```
+GOOS=linux GOARCH=amd64 go build
+```
+
 ## Endpoints
 
 ### Resource components
