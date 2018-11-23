@@ -53,8 +53,11 @@ func GetWordSuggestion(rw http.ResponseWriter, request *http.Request) {
 		panic(err)
 	} else {
 		suggestWord := SpaceMap(wordRequest.Word)
+
+		requestStart := time.Now()
 		url := "http://suggestqueries.google.com/complete/search?client=chrome&q=" + suggestWord
 		response, err := http.Get(url)
+		requestElapsed := time.Since(requestStart)
 
 		if err != nil {
 			logger.WriteLog(err.Error())
@@ -87,12 +90,14 @@ func GetWordSuggestion(rw http.ResponseWriter, request *http.Request) {
 					wordResponseEncode, _ := json.Marshal(wordResponse)
 					json.NewEncoder(rw).Encode(string(wordResponseEncode))
 
-					elapsed := time.Since(start)
-
 					logResult := fmt.Sprintf("{'source_word': '%s', 'suggestion_word': '%s'}", wordRequest.Word, wordResponse.Word)
 					logger.WriteLog(logResult)
 
-					logData := "POST /suggestion 200 " + elapsed.String() + " - -"
+					logGoogleRequest := fmt.Sprintf("GET Google word suggestion API, elasped: %s", requestElapsed.String())
+					logger.WriteLog(logGoogleRequest)
+
+					elapsed := time.Since(start)
+					logData := fmt.Sprintf("POST /suggestion 200 %s - -", elapsed.String())
 					logger.WriteLog(logData)
 
 					break
@@ -107,8 +112,14 @@ func GetWordSuggestion(rw http.ResponseWriter, request *http.Request) {
 			wordResponseEncode, _ := json.Marshal(wordResponse)
 			json.NewEncoder(rw).Encode(string(wordResponseEncode))
 
+			logResult := fmt.Sprintf("{'source_word': '%s', 'suggestion_word': '%s'}", wordRequest.Word, wordResponse.Word)
+			logger.WriteLog(logResult)
+
+			logGoogleRequest := fmt.Sprintf("GET Google word suggestion API, elasped: %s", requestElapsed.String())
+			logger.WriteLog(logGoogleRequest)
+
 			elapsed := time.Since(start)
-			logData := "POST /suggestion 200 " + elapsed.String() + " - -"
+			logData := fmt.Sprintf("POST /suggestion 200 %s - -", elapsed.String())
 			logger.WriteLog(logData)
 		}
 	}
