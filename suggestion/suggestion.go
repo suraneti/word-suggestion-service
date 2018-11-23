@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 	"unicode"
-	"word_suggestion/logging"
+	"word_suggestion/logger"
 )
 
 // An WordRequest represents on GetWordSuggestion function found in a main.go file.
@@ -49,7 +49,7 @@ func GetWordSuggestion(rw http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		rw.Write([]byte("500 - Something bad happened!"))
-		logging.WriteLog(err.Error())
+		logger.WriteLog(err.Error())
 		panic(err)
 	} else {
 		suggestWord := SpaceMap(wordRequest.Word)
@@ -57,7 +57,7 @@ func GetWordSuggestion(rw http.ResponseWriter, request *http.Request) {
 		response, err := http.Get(url)
 
 		if err != nil {
-			logging.WriteLog(err.Error())
+			logger.WriteLog(err.Error())
 			fmt.Printf("%s", err)
 			os.Exit(1)
 		}
@@ -66,32 +66,39 @@ func GetWordSuggestion(rw http.ResponseWriter, request *http.Request) {
 		contents, err := ioutil.ReadAll(response.Body)
 
 		if err != nil {
-			logging.WriteLog(err.Error())
+			logger.WriteLog(err.Error())
 			fmt.Printf("%s", err)
 			os.Exit(1)
 		}
 
-		var suggestionlist [][]string
-		dec := json.NewDecoder(strings.NewReader(string(contents)))
-		err = dec.Decode(&suggestionlist)
+		var decoded [][]interface{}
+		err = json.Unmarshal(contents, &decoded)
 
-		if suggestionlist != nil {
-			for i, list := range suggestionlist {
-				if i == 1 {
+		if len(decoded[1]) > 0 {
+
+			for index, list := range decoded[1] {
+				if index == 0 {
+					str := list.(string)
+
 					wordResponse := &WordResponse{
-						Word: list[0],
+						Word: str,
 					}
 
 					wordResponseEncode, _ := json.Marshal(wordResponse)
 					json.NewEncoder(rw).Encode(string(wordResponseEncode))
 
 					elapsed := time.Since(start)
-					logdata := "POST /suggestion 200 " + elapsed.String() + " - -"
-					logging.WriteLog(logdata)
-				} else {
-					continue
+
+					logResult := fmt.Sprintf("{'source_word': '%s', 'suggestion_word': '%s'}", wordRequest.Word, wordResponse.Word)
+					logger.WriteLog(logResult)
+
+					logData := "POST /suggestion 200 " + elapsed.String() + " - -"
+					logger.WriteLog(logData)
+
+					break
 				}
 			}
+
 		} else {
 			wordResponse := &WordResponse{
 				Word: "Not found",
@@ -101,8 +108,8 @@ func GetWordSuggestion(rw http.ResponseWriter, request *http.Request) {
 			json.NewEncoder(rw).Encode(string(wordResponseEncode))
 
 			elapsed := time.Since(start)
-			logdata := "POST /suggestion 200 " + elapsed.String() + " - -"
-			logging.WriteLog(logdata)
+			logData := "POST /suggestion 200 " + elapsed.String() + " - -"
+			logger.WriteLog(logData)
 		}
 	}
 }
