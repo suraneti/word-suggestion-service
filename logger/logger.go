@@ -1,4 +1,4 @@
-package logging
+package logger
 
 import (
 	"log"
@@ -7,7 +7,7 @@ import (
 
 // WriteLog write text data into log file
 func WriteLog(text string) {
-	f, err := os.OpenFile("word_suggestion_service.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	f, err := os.OpenFile("word_suggestion.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
